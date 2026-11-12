@@ -758,7 +758,10 @@ function headerCompact(cv, t, x, y, w, h, title, tabs, sel, badges) {
     const bh = 30, bsize = 17;
     const bws = (badges || []).map((b) => Math.max(bh * 3.5, cv.textWidth(b.text, bsize, bopt) + bh));
     const badgesW = bws.reduce((a, b) => a + b + bh * 0.4, 0);
-    const tsize = 32, titleW = title ? cv.textWidth(title, tsize) : 0;
+    // an app's own title look (app.json "config": { "header": { size, bold, stripes } }): stripes = the theme's stripe colours
+    // left of the name, as on the panels
+    const look = t.headLook || {}, stripeW = look.stripes ? 96 + 18 : 0, topt = look.bold ? { font: 'bold' } : undefined;
+    const tsize = look.size || 32, titleW = title ? cv.textWidth(title, tsize, topt) + stripeW : 0;
     const room = w - 20 - (badgesW ? badgesW + 12 : 0);
     const tw = tabWidths(cv, names, 18, opt, 132, 44, room - 20, 20);
     const tabsW = tw.reduce((a, b) => a + b, 0);
@@ -772,7 +775,11 @@ function headerCompact(cv, t, x, y, w, h, title, tabs, sel, badges) {
     cv.fillRect(x, y + h - 2, end - x, 2, withAlpha('#ffffff', 0.22));
     let tx = x + 20;
     if (showTitle) {
-        cv.text(title, tx, y + h / 2 + tsize * 0.36, tsize, t.text);
+        if (stripeW) {
+            const st = t.stripes || [t.accent], sw = (96 - 4 * (st.length - 1)) / st.length, sy = y + h / 2 - 4;
+            st.forEach((c, i) => cv.fillRect(tx + i * (sw + 4), sy, sw, 8, c));
+        }
+        cv.text(title, tx + stripeW, y + h / 2 + tsize * 0.36, tsize, t.text, topt);
         tx += titleW + 32;
     }
     cv.tabRects = [];

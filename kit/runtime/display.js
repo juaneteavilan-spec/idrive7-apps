@@ -787,7 +787,7 @@ class Display {
         // compact header in the HMI strip's own black, only as wide as its name, tabs and badges:
         // right of it the HMI's strip shows through (radio station, phone signal, status icons)
         const hx = HMI.left - pl.x;
-        const end = G.header(c, Object.assign({}, t, { bg: HMI.headBg }), hx, 0, HMI.status.x - pl.x - hx, FULL.headH,
+        const end = G.header(c, Object.assign({}, t, { bg: HMI.headBg, headLook: (this.spec.config || {}).header }), hx, 0, HMI.status.x - pl.x - hx, FULL.headH,
             this.screen.title || this.spec.title, tb.tabs, tb.sel, tb.badges, true, true);
         // the HMI's own title is in the strip under the header: a narrower header (a sheet: no tabs) stays
         // as wide as the app's widest, so none of that title shows beside it
