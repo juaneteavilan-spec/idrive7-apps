@@ -1,0 +1,158 @@
+{
+  "id": "m240_track_day",
+  "title": "Track Day Mode",
+  "description": "One screen for a track day: tyres, oil temperature + pressure, coolant, gearbox, intake and charge air, fuel, ethanol (MHD flex fuel), boost, HPFP, AFR and knock",
+  "version": "0.5.0",
+  "vendor": "custom",
+  "loggingId": "OAB1",
+  "iconGlyph": "flag",
+  "signals": {
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "statusEngineTemperature": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "_optional": "the car's display units; tyre pressures / temperatures are then guessed from their values",
+      "statusNewCurrentUnitsStatusExt": "rs"
+    },
+    "de.bmw.infrastructure.analytics.BasicDataSet": {
+      "_optional": "gearbox oil temperature, used only when the gearbox and engine units don't answer",
+      "basicDataSet": "s"
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "statusTyreTemperature": "rs",
+      "statusTyrePressure": "rs",
+      "statusTargetTyrePressure": "rs"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": ["sendTasuRequest"],
+      "_broadcasts": ["sendTasuResponse"]
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Track Day Mode",
+      "buttons": [
+        ["BTN_RESET", "New session"],
+        ["BTN_SETTINGS", "Settings"]
+      ]
+    }
+  ],
+  "settings": [
+    {"key": "tempUnit", "label": "Temperature unit", "type": "choice", "default": "c", "group": "Units",
+     "options": [["c", "Celsius (°C)"], ["f", "Fahrenheit (°F)"]]},
+    {"key": "pressUnit", "label": "Pressure unit (tyres, oil, boost)", "type": "choice", "default": "psi", "group": "Units",
+     "options": [["psi", "psi"], ["bar", "bar"], ["kpa", "kPa"]]},
+    {"key": "fuelPressUnit", "label": "Fuel pressure unit (HPFP)", "type": "choice", "default": "psi", "group": "Units",
+     "options": [["psi", "psi"], ["bar", "bar"], ["mpa", "MPa"]]},
+    {"key": "mixture", "label": "Mixture shown as", "type": "choice", "default": "afr", "group": "Units",
+     "options": [["afr", "AFR, gasoline scale (14.7)"], ["afrfuel", "AFR of the fuel in the tank"], ["lambda", "Lambda"]]},
+    {"key": "ethanolSource", "label": "Ethanol from", "type": "choice", "default": "auto",
+     "options": [["auto", "Auto (MHD, else the DME)"], ["mhd", "MHD flex fuel (Active)"], ["dme", "DME's own value (550D)"]]},
+    {"key": "tyreProfile", "label": "Tyre profile", "type": "choice", "default": "dry",
+     "options": [["dry", "Dry"], ["hot", "Hot track"], ["wet", "Wet"]]},
+    {"key": "tgtDryF", "label": "Dry: hot target, front", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "dry"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tgtDryR", "label": "Dry: hot target, rear", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "dry"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tgtHotF", "label": "Hot track: hot target, front", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "hot"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tgtHotR", "label": "Hot track: hot target, rear", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "hot"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tgtWetF", "label": "Wet: hot target, front", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "wet"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tgtWetR", "label": "Wet: hot target, rear", "type": "number", "unit": "psi", "default": 0, "labels": {"0": "Not set"}, "when": {"tyreProfile": "wet"},
+     "steps": [0, 28, 28.5, 29, 29.5, 30, 30.5, 31, 31.5, 32, 32.5, 33, 33.5, 34, 34.5, 35, 35.5, 36, 36.5, 37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44]},
+    {"key": "tyreCold", "label": "Tyres: working from", "type": "number", "unit": "°C", "default": 35, "steps": [20, 25, 30, 35, 40, 45, 50]},
+    {"key": "tyreHot", "label": "Tyres: too hot from", "type": "number", "unit": "°C", "default": 80, "steps": [60, 65, 70, 75, 80, 85, 90, 95, 100]},
+    {"key": "oilWarn", "label": "Oil temp warning", "type": "number", "unit": "°C", "default": 125, "steps": [110, 115, 120, 125, 130, 135]},
+    {"key": "oilPressMin", "label": "Oil pressure warning below (above 2000 rpm)", "type": "number", "unit": "psi", "default": 25,
+     "steps": [15, 20, 25, 30, 35, 40]},
+    {"key": "coolantWarn", "label": "Coolant temp warning", "type": "number", "unit": "°C", "default": 112, "steps": [100, 105, 108, 110, 112, 115, 120]},
+    {"key": "gearboxWarn", "label": "Gearbox temp warning", "type": "number", "unit": "°C", "default": 120, "steps": [100, 105, 110, 115, 120, 125, 130]},
+    {"key": "chargeWarn", "label": "Charge air temp warning", "type": "number", "unit": "°C", "default": 60, "steps": [45, 50, 55, 60, 65, 70, 75]},
+    {"key": "knockWarn", "label": "Knock retard warning from", "type": "number", "unit": "°", "default": 3, "steps": [1.5, 2, 3, 4, 5, 6]},
+    {"key": "layout", "label": "Screen layout", "type": "choice", "default": "full",
+     "options": [["full", "Full screen"], ["standard", "Standard"]]},
+    {"key": "renderer", "label": "Renderer", "type": "choice", "default": "auto",
+     "options": [["auto", "GPU 60 fps (default)"], ["software", "Software"]]},
+    {"key": "demo", "label": "Demo data", "type": "choice", "default": "auto",
+     "options": [["auto", "Auto"], ["on", "Always"], ["off", "Never"]]}
+  ],
+  "config": {
+    "header": {"size": 40, "bold": true, "stripes": true},
+    "comment": "Signal scalings as M Vitals (car_vitals/app.json), checked on real cars. Pressures are kept in bar inside the app and shown in psi; temperatures in deg C.",
+    "scaling": {
+      "rpm": {"factor": 0.25, "offset": 0, "invalid": 65535},
+      "engineTemp": {"factor": 1, "offset": -48, "invalid": 255},
+      "gearboxTemp": {"factor": 1, "offset": -48, "invalid": 255},
+      "tyreTemp": {"factor": 1, "offset": -40, "invalid": 65535},
+      "tyrePress": {"factor": 0.1, "offset": 0, "invalidFrom": 65532}
+    },
+    "mhd": {
+      "comment": "Ethanol from an MHD-flashed DME (mhd_poller.js / mhd_protocol.js, from Perea Performance's Flex Fuel app): probe 2F 04 'MHD', identify the ROM (22 F1 01/02), define a dynamic identifier over MHD's two RAM bytes (2C 02, volatile: the DME forgets it at an ignition cycle), read it twice a second (22). Addresses per DME program family in mhd_protocol.js PROFILES (known: 5D55, B58 gen2 MG1). fuelPollMs 0: the tank is not read here.",
+      "dynamicDids": ["F303", "F301"],
+      "pollMs": 500,
+      "fuelPollMs": 0
+    },
+    "dme": {
+      "comment": "Read only (UDS 0x22 / OBD 01) from the engine unit (ecu 18 = 0x12, DME8FF_R: B58 / B48 / B38) and the gearbox unit (ecu 24 = 0x18, ZF 8HP). Candidates are tried in order, the first plausible answer wins. Scalings from the engine unit's SGBD description (apps/live_data/builtin/DME8FF_R.json), turned into bar / deg C here. Pressures marked absolute have the outside air pressure (baro) taken off.",
+      "ecu": 18,
+      "baro": [
+        {"did": "4201", "bytes": 2, "at": 0, "factor": 0.0000390625, "min": 0.6, "max": 1.1, "note": "IPUMG outside air pressure, hPa * 0.0390625 -> bar"},
+        {"obd": "33", "bytes": 1, "at": 0, "factor": 0.01, "min": 0.6, "max": 1.1, "note": "OBD PID 0x33, kPa -> bar"}
+      ],
+      "oilP": [
+        {"did": "4436", "bytes": 2, "at": 0, "factor": 0.001, "min": 0.5, "max": 12, "note": "I_DRUCK_OEL_IST_ABS, oil pressure absolute, hPa -> bar"},
+        {"did": "586F", "bytes": 2, "at": 0, "factor": 0.001, "signed": true, "min": 0.5, "max": 12, "note": "OELDRUCK, hPa -> bar (absolute, as Live Data reads it)"}
+      ],
+      "iat": [
+        {"did": "580F", "bytes": 1, "at": 0, "factor": 0.75, "offset": -48, "min": -40, "max": 150, "note": "ITANS intake air temperature"},
+        {"obd": "0F", "bytes": 1, "at": 0, "factor": 1, "offset": -40, "min": -40, "max": 150, "note": "OBD PID 0x0F"}
+      ],
+      "chargeAir": [
+        {"did": "59D4", "bytes": 2, "at": 0, "factor": 0.0234375, "offset": -273.15, "min": -40, "max": 150, "note": "ANSAUGLUFTTEMP_VOR_DK, charge air before the throttle (after the intercooler), measured"}
+      ],
+      "fuelT": [
+        {"did": "4AD5", "bytes": 1, "at": 0, "factor": 0.75, "offset": -48, "min": -40, "max": 120, "note": "TEMP_KRAFTSTOFF fuel temperature"}
+      ],
+      "ethanol": [
+        {"did": "550D", "bytes": 1, "at": 0, "factor": 0.39215686, "min": 0, "max": 100, "note": "PROZENT_ALK_KRST alcohol in the fuel, % (flex fuel sensor)"},
+        {"obd": "52", "bytes": 1, "at": 0, "factor": 0.39215686, "min": 0, "max": 100, "note": "OBD PID 0x52 ethanol fuel %"}
+      ],
+      "knock": [
+        {"did": "554C", "bytes": 1, "at": 0, "factor": 0.375, "signed": true, "min": -30, "max": 30, "note": "MITTELW_ZYLIND_ZWSPAET_KR_HALBQUANT, mean ignition retard by knock control over the cylinders, deg crank. Sign checked in the log ('raw knock')"}
+      ],
+      "lambda": [
+        {"did": "5889", "bytes": 2, "at": 0, "factor": 0.000244140625, "min": 0.5, "max": 1.6, "note": "ILAG1 lambda actual, bank 1"}
+      ],
+      "lambdaTarget": [
+        {"did": "5816", "bytes": 2, "at": 0, "factor": 0.000244140625, "min": 0.5, "max": 1.6, "note": "S_LAMBDA_SOLLWERT lambda target"}
+      ],
+      "hpfp": [
+        {"did": "5658", "bytes": 2, "at": 0, "factor": 0.02, "min": 5, "max": 600, "note": "I_DRUCK_RAIL_ABS_FILT_NEU rail pressure actual, MPa * 0.002 -> bar. First: the older 58EF tops out at 327 bar, a B58 TU runs up to 350"},
+        {"did": "58EF", "bytes": 2, "at": 0, "factor": 0.005, "min": 5, "max": 330, "note": "I_DRUCK_RAIL_ABS_FILT rail pressure actual, MPa * 0.0005 -> bar"},
+        {"obd": "23", "bytes": 2, "at": 0, "factor": 0.1, "min": 5, "max": 600, "note": "OBD PID 0x23 fuel rail gauge pressure, 10 kPa -> bar"}
+      ],
+      "hpfpTarget": [
+        {"did": "56C1", "bytes": 2, "at": 0, "factor": 0.02, "min": 5, "max": 600, "note": "S_RAILDRUCKREGELUNG_NEU rail pressure target, MPa * 0.002 -> bar"},
+        {"did": "5837", "bytes": 2, "at": 0, "factor": 0.005, "min": 5, "max": 330, "note": "S_RAILDRUCKREGELUNG rail pressure target, MPa * 0.0005 -> bar"}
+      ],
+      "boost": [
+        {"did": "4205", "bytes": 2, "at": 0, "factor": 0.000078125, "min": 0.2, "max": 5, "note": "IPLAD pressure before the throttle (absolute), hPa * 0.078125 -> bar"},
+        {"did": "F470", "bytes": 2, "at": 3, "factor": 0.0003125, "min": 0.2, "max": 6, "note": "OBD PID 0x70 boost sensor A (absolute), 1/32 kPa -> bar"}
+      ],
+      "boostTarget": [
+        {"did": "4AB0", "bytes": 2, "at": 0, "factor": 0.0000390625, "min": 0.2, "max": 4, "note": "S_LADEDRUCK boost target (absolute), hPa * 0.0390625 -> bar"},
+        {"did": "F470", "bytes": 2, "at": 1, "factor": 0.0003125, "min": 0.2, "max": 6, "note": "OBD PID 0x70 commanded boost A (absolute)"}
+      ],
+      "gearbox": [
+        {"ecu": 24, "did": "6000", "bytes": 1, "at": 0, "factor": 1, "offset": -40, "min": -40, "max": 160, "note": "ZF 8HP (GSZFBCE) transmission oil temperature, deg C + 40 (idrive7-apps PR #29, read on a G22)"},
+        {"did": "4650", "bytes": 1, "at": 0, "factor": 0.75, "offset": -48, "min": -40, "max": 160, "note": "TEMP_GETRIEBE gearbox temperature as the engine unit knows it"}
+      ]
+    }
+  }
+}
